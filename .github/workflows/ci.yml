@@ -1,9 +1,5 @@
 name: CI
 
-# This is a minimal placeholder pipeline for Lab 0.
-# You will extend this workflow starting in Lab 3 (baseline CI/CD pipeline)
-# and keep adding security controls to it in every lab through Lab 12.
-
 on:
   push:
     branches: [main]
@@ -22,34 +18,3 @@ jobs:
 
       - name: Confirm pipeline runs
         run: echo "CI pipeline stub is working. Extend this in Lab 3."
-        
-name: DAST
-
-on: [push, pull_request]
-
-permissions:
-  contents: read
-
-jobs:
-  dast:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Start Juice Shop
-        run: docker run -d -p 3000:3000 bkimminich/juice-shop
-
-      - name: Wait for Juice Shop to be ready
-        run: |
-          timeout 60 bash -c 'until curl -sf http://localhost:3000; do sleep 2; done'
-
-      - name: Run ZAP baseline scan
-        run: |
-          docker run --rm -t --network host -v $(pwd):/zap/wrk/:rw \
-            zaproxy/zap-stable zap-baseline.py \
-            -t http://localhost:3000 -r zap-report.html
-
-      - name: Upload ZAP report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-report
-          path: zap-report.html

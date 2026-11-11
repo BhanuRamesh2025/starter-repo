@@ -16,9 +16,14 @@ jobs:
         run: |
           timeout 60 bash -c 'until curl -sf http://localhost:3000; do sleep 2; done'
 
+      - name: Prepare ZAP working directory
+        run: |
+          mkdir -p zap-wrk
+          chmod -R 777 zap-wrk
+
       - name: Run ZAP baseline scan
         run: |
-          docker run --rm -t --network host -v $(pwd):/zap/wrk/:rw \
+          docker run --rm -t --network host -v $(pwd)/zap-wrk:/zap/wrk/:rw \
             zaproxy/zap-stable zap-baseline.py \
             -t http://localhost:3000 -r zap-report.html
 
@@ -27,4 +32,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: zap-report.html
+          path: zap-wrk/zap-report.html

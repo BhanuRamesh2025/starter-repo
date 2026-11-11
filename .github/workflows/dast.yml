@@ -1,0 +1,35 @@
+name: DAST
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  dast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start Juice Shop
+        run: docker run -d -p 3000:3000 bkimminich/juice-shop
+
+      - name: Wait for Juice Shop to be ready
+        run: |
+          timeout 60 bash -c 'until curl -sf http://localhost:3000; do sleep 2; done'
+
+      - name: Prepare ZAP working directory
+        run: |
+          mkdir -p zap-wrk
+          chmod -R 777 zap-wrk
+
+      - name: Run ZAP baseline scan
+        run: |
+          docker run --rm -t --network host -v $(pwd)/zap-wrk:/zap/wrk/:rw \
+            zaproxy/zap-stable zap-baseline.py \
+            -t http://localhost:3000 -r zap-report.html
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap-wrk/zap-report.html

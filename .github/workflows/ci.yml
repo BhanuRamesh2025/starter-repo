@@ -1,9 +1,5 @@
 name: CI
 
-# This is a minimal placeholder pipeline for Lab 0.
-# You will extend this workflow starting in Lab 3 (baseline CI/CD pipeline)
-# and keep adding security controls to it in every lab through Lab 12.
-
 on:
   push:
     branches: [main]
